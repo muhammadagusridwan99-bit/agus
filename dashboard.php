@@ -246,4 +246,8 @@ $stok_menipis = 5;
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> 72998866e94db66d3606ba4d5e927ebc08315b7c
