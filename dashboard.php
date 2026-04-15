@@ -3,15 +3,17 @@ include 'config.php';
 session_start();
 
 if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
+    header("Location: index.php"); // Pastikan arahkan ke file login kamu
     exit();
 }
 
-// Simulasi data (Ganti dengan query database asli Anda)
-$tanggal_hari_ini = date('Y-m-d');
-$jumlah_transaksi = 25; // Contoh statis
-$total_pendapatan = "Rp 2.500.000";
-$stok_menipis = 5;
+// Data Dinamis dari Database
+// 1. Hitung Jumlah Transaksi Hari Ini
+$tgl_sekarang = date('Y-m-d');
+// (Nanti kamu bisa ganti statis ini dengan query SQL asli)
+$jumlah_transaksi = 45; 
+$total_pendapatan = 3500000;
+$stok_menipis = 15;
 ?>
 
 <!DOCTYPE html>
@@ -19,91 +21,133 @@ $stok_menipis = 5;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern POS - Dashboard</title>
+    <title>SmartPOS - Elite Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary-color: #4361ee;
-            --sidebar-bg: #1e1e2d;
-            --body-bg: #f5f7fb;
+            --bg-dark: #060b18;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #7d5fff;
+            --accent-success: #3ae374;
+            --accent-warning: #ff9f43;
         }
 
         body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--body-bg);
-            overflow-x: hidden;
-        }
-
-        /* Sidebar Styling */
-        .sidebar {
-            background-color: var(--sidebar-bg);
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-dark);
+            color: #ffffff;
             min-height: 100vh;
-            color: #a2a3b7;
-            transition: all 0.3s;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(125, 95, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(58, 227, 116, 0.05) 0%, transparent 40%);
         }
 
-        .sidebar .nav-link {
-            color: #a2a3b7;
-            padding: 12px 20px;
-            margin: 5px 15px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
+        /* Sidebar Glass Styling */
+        .sidebar {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            min-height: 100vh;
+            position: sticky; top: 0;
+        }
+
+        .nav-link {
+            color: #94a3b8;
+            padding: 14px 20px;
+            margin: 8px 15px;
+            border-radius: 15px;
+            transition: 0.3s;
+            display: flex; align-items: center;
             font-weight: 500;
         }
 
-        .sidebar .nav-link i { font-size: 1.2rem; margin-right: 15px; }
-
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background: rgba(67, 97, 238, 0.15);
-            color: #ffffff;
+        .nav-link i { font-size: 1.2rem; margin-right: 12px; }
+        .nav-link:hover { background: var(--glass); color: #fff; }
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--accent-primary), #5741d9);
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(125, 95, 255, 0.3);
         }
 
-        .sidebar .nav-link.active { background: var(--primary-color); }
-
-        /* Content Styling */
-        .main-content { padding: 30px; }
-
+        /* Topbar */
         .top-nav {
-            background: #fff;
-            padding: 15px 30px;
-            border-bottom: 1px solid #e1e1e1;
+            padding: 20px 40px;
+            background: rgba(6, 11, 24, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
         }
 
-        /* Card Customization */
+        /* Stats Card Luxury */
         .stat-card {
-            border: none;
-            border-radius: 16px;
-            padding: 20px;
-            transition: all 0.3s cubic-bezier(.25,.8,.25,1);
-            background: #fff;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.4s;
         }
-
         .stat-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        .icon-box {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .icon-circle {
+            width: 55px; height: 55px;
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
             font-size: 1.5rem;
+            margin-bottom: 20px;
         }
 
-        .bg-light-primary { background: rgba(67, 97, 238, 0.1); color: var(--primary-color); }
-        .bg-light-success { background: rgba(40, 167, 69, 0.1); color: #28a745; }
-        .bg-light-warning { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+        .glow-primary { background: rgba(125, 95, 255, 0.15); color: var(--accent-primary); box-shadow: 0 0 20px rgba(125, 95, 255, 0.2); }
+        .glow-success { background: rgba(58, 227, 116, 0.15); color: var(--accent-success); box-shadow: 0 0 20px rgba(58, 227, 116, 0.2); }
+        .glow-warning { background: rgba(255, 159, 67, 0.15); color: var(--accent-warning); box-shadow: 0 0 20px rgba(255, 159, 67, 0.2); }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .sidebar { min-height: auto; }
+        /* Table Design */
+        .luxury-card {
+            background: var(--glass);
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+        }
+        .table { color: #e2e8f0; --bs-table-bg: transparent; }
+        .table thead th { border: none; color: #64748b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+
+        .badge-status {
+            background: rgba(58, 227, 116, 0.1);
+            color: var(--accent-success);
+            border: 1px solid rgba(58, 227, 116, 0.2);
+            padding: 6px 15px; border-radius: 10px; font-size: 0.8rem;
+        }
+
+        .user-pill {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 8px 20px; border-radius: 50px;
+            color: #fff; text-decoration: none;
+            transition: 0.3s;
+        }
+        .user-pill:hover { background: #fff; color: #000; }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        .live-indicator {
+            width: 8px; height: 8px;
+            background: var(--accent-success);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
@@ -111,130 +155,114 @@ $stok_menipis = 5;
 
 <div class="container-fluid p-0">
     <div class="row g-0">
-        <div class="col-md-3 col-lg-2 sidebar d-none d-md-block shadow">
-            <div class="p-4 text-center">
-                <h4 class="text-white fw-bold mb-0">SMART<span class="text-primary">POS</span></h4>
-                <p class="small opacity-50">Management System</p>
+        <div class="col-md-3 col-lg-2 sidebar d-none d-md-block">
+            <div class="p-4 mb-4 text-center">
+                <div class="glow-primary icon-circle mx-auto mb-3" style="width: 45px; height: 45px; border-radius: 12px;">
+                    <i class="bi bi-cpu-fill"></i>
+                </div>
+                <h5 class="fw-bold mb-0">SMART<span class="text-primary">POS</span></h5>
+                <p class="small text-white-50">Waroeng D` Gebyok</p>
             </div>
             
-            <ul class="nav flex-column mt-3">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a href="data_barang.php" class="nav-link"><i class="bi bi-box-seam"></i> Data Barang</a>
-                </li>
-                <li class="nav-item">
-                    <a href="data_pengguna.php" class="nav-link"><i class="bi bi-people"></i> Pengguna</a>
-                </li>
-                <li class="nav-item">
-                    <a href="transaksi.php" class="nav-link"><i class="bi bi-receipt"></i> Transaksi</a>
-                </li>
-                <li class="mt-4 px-4 text-uppercase small fw-bold opacity-50" style="letter-spacing: 1px;">Account</li>
-                <li class="nav-item">
-                    <a href="logout.php" class="nav-link text-danger"><i class="bi bi-box-arrow-right"></i> Keluar</a>
-                </li>
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="dashboard.php" class="nav-link active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="data_kopi.php" class="nav-link"><i class="bi bi-cup-hot"></i> Menu Kopi</a></li>
+                <li class="nav-item"><a href="data_pengguna.php" class="nav-link"><i class="bi bi-people"></i> Anggota Tim</a></li>
+                <li class="nav-item"><a href="transaksi.php" class="nav-link"><i class="bi bi-receipt-cutoff"></i> Kasir</a></li>
+                <li class="mt-5 px-4"><hr class="opacity-10"></li>
+                <li class="nav-item"><a href="logout.php" class="nav-link text-danger"><i class="bi bi-power"></i> Keluar</a></li>
             </ul>
         </div>
 
         <div class="col-md-9 col-lg-10">
-            <header class="top-nav d-flex justify-content-between align-items-center shadow-sm">
-                <h5 class="mb-0 fw-semibold">Overview</h5>
-                <div class="dropdown">
-                    <button class="btn btn-light rounded-pill px-3 dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle me-2"></i> <?php echo $_SESSION['username']; ?>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i> Pengaturan</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i> Keluar</a></li>
-                    </ul>
+            <header class="top-nav d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-white-50 small"><i class="bi bi-calendar3 me-2"></i><?= date('D, d M Y'); ?></span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="small text-white-50"><span class="live-indicator"></span>System Online</span>
+                    <a href="#" class="user-pill small">
+                        <i class="bi bi-person-circle me-2"></i><?= $_SESSION['username']; ?>
+                    </a>
                 </div>
             </header>
 
-            <div class="main-content">
-                <div class="mb-4">
-                    <h3 class="fw-bold text-dark">Selamat Datang Kembali! 👋</h3>
-                    <p class="text-muted">Ini adalah ringkasan penjualan toko Anda untuk hari ini.</p>
+            <div class="p-5">
+                <div class="row mb-5">
+                    <div class="col-md-12">
+                        <h2 class="fw-bold mb-1">Hello, <?= $_SESSION['username']; ?>! ✨</h2>
+                        <p class="text-white-50">Berikut adalah performa bisnismu hari ini di perusahaan PPLG.</p>
+                    </div>
                 </div>
 
-                <div class="row g-4">
-                    <div class="col-12 col-sm-6 col-xl-4">
-                        <div class="stat-card shadow-sm d-flex align-items-center">
-                            <div class="icon-box bg-light-primary me-3">
-                                <i class="bi bi-cart-check-fill"></i>
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="icon-circle glow-primary">
+                                <i class="bi bi-bag-check"></i>
                             </div>
-                            <div>
-                                <p class="text-muted mb-0 small fw-bold text-uppercase">Transaksi Hari Ini</p>
-                                <h3 class="mb-0 fw-bold"><?php echo $jumlah_transaksi; ?></h3>
-                            </div>
+                            <h6 class="text-white-50 small fw-bold text-uppercase mb-2">Total Transaksi</h6>
+                            <h2 class="fw-bold mb-0"><?= $jumlah_transaksi; ?> <span class="fs-6 fw-normal text-white-50">Orders</span></h2>
                         </div>
                     </div>
-
-                    <div class="col-12 col-sm-6 col-xl-4">
-                        <div class="stat-card shadow-sm d-flex align-items-center">
-                            <div class="icon-box bg-light-success me-3">
-                                <i class="bi bi-currency-dollar"></i>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="icon-circle glow-success">
+                                <i class="bi bi-wallet2"></i>
                             </div>
-                            <div>
-                                <p class="text-muted mb-0 small fw-bold text-uppercase">Total Pendapatan</p>
-                                <h3 class="mb-0 fw-bold"><?php echo $total_pendapatan; ?></h3>
-                            </div>
+                            <h6 class="text-white-50 small fw-bold text-uppercase mb-2">Pendapatan Hari Ini</h6>
+                            <h2 class="fw-bold mb-0">Rp <?= number_format($total_pendapatan, 0, ',', '.'); ?></h2>
                         </div>
                     </div>
-
-                    <div class="col-12 col-sm-6 col-xl-4">
-                        <div class="stat-card shadow-sm d-flex align-items-center">
-                            <div class="icon-box bg-light-warning me-3">
-                                <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="icon-circle glow-warning">
+                                <i class="bi bi-box-seam"></i>
                             </div>
-                            <div>
-                                <p class="text-muted mb-0 small fw-bold text-uppercase">Stok Menipis</p>
-                                <h3 class="mb-0 fw-bold"><?php echo $stok_menipis; ?> <span class="small fw-normal text-muted">Item</span></h3>
-                            </div>
+                            <h6 class="text-white-50 small fw-bold text-uppercase mb-2">Stok Menipis</h6>
+                            <h2 class="fw-bold mb-0"><?= $stok_menipis; ?> <span class="fs-6 fw-normal text-white-50">Varian</span></h2>
                         </div>
                     </div>
                 </div>
 
-                <div class="row mt-5">
+                <div class="row">
                     <div class="col-12">
-                        <div class="card border-0 shadow-sm rounded-4">
-                            <div class="card-header bg-white border-0 py-3">
-                                <h5 class="mb-0 fw-bold">Transaksi Terbaru</h5>
+                        <div class="luxury-card shadow-lg">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0">Aktifitas Terakhir</h5>
+                                <a href="transaksi.php" class="btn btn-sm btn-outline-light border-0 opacity-50">Lihat Semua <i class="bi bi-arrow-right ms-1"></i></a>
                             </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="bg-light">
-                                            <tr>
-                                                <th class="ps-4">ID Transaksi</th>
-                                                <th>Nama Barang</th>
-                                                <th>Waktu</th>
-                                                <th>Total</th>
-                                                <th class="text-center">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td class="ps-4 fw-medium">#TRX-001</td>
-                                                <td>Kopi Arabika 250g</td>
-                                                <td class="text-muted">10:20 AM</td>
-                                                <td class="fw-bold text-primary">Rp 45.000</td>
-                                                <td class="text-center"><span class="badge bg-success-subtle text-success px-3 rounded-pill">Selesai</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="ps-4 fw-medium">#TRX-002</td>
-                                                <td>Susu UHT Full Cream</td>
-                                                <td class="text-muted">09:15 AM</td>
-                                                <td class="fw-bold text-primary">Rp 18.500</td>
-                                                <td class="text-center"><span class="badge bg-success-subtle text-success px-3 rounded-pill">Selesai</span></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-white border-0 py-3 text-center">
-                                <a href="transaksi.php" class="btn btn-outline-primary btn-sm rounded-pill px-4">Lihat Semua Transaksi</a>
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Pelanggan</th>
+                                            <th>Produk</th>
+                                            <th>Metode</th>
+                                            <th>Total</th>
+                                            <th class="text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-white-50 small">#8821</td>
+                                            <td class="fw-bold">marcell</td>
+                                            <td>Iced Caramel Macchiato</td>
+                                            <td><i class="bi bi-credit-card me-2"></i>QRIS</td>
+                                            <td class="fw-bold text-primary">Rp 35.000</td>
+                                            <td class="text-center"><span class="badge-status">Success</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-white-50 small">#8820</td>
+                                            <td class="fw-bold">wiliamm</td>
+                                            <td>Double Shot Espresso</td>
+                                            <td><i class="bi bi-cash me-2"></i>Tunai</td>
+                                            <td class="fw-bold text-primary">Rp 22.000</td>
+                                            <td class="text-center"><span class="badge-status">Success</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -246,8 +274,4 @@ $stok_menipis = 5;
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> 72998866e94db66d3606ba4d5e927ebc08315b7c
